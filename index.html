@@ -1157,8 +1157,8 @@
                 return;
             }
             
+            // Try server first, fall back to localStorage
             try {
-                // Check if username already exists
                 const checkResponse = await fetch(`/api/check/${encodeURIComponent(username)}`);
                 const checkResult = await checkResponse.json();
                 
@@ -1182,8 +1182,16 @@
                     showToast(result.error || 'Save failed');
                 }
             } catch (error) {
-                showToast('Connection error');
-                console.error('Save error:', error);
+                // Fallback to localStorage
+                const key = `travelmap_${username.toLowerCase()}`;
+                const existing = localStorage.getItem(key);
+                if (existing) {
+                    if (!confirm(`Username "${username}" already exists. Overwrite?`)) {
+                        return;
+                    }
+                }
+                localStorage.setItem(key, JSON.stringify({ places, savedAt: Date.now() }));
+                showToast(`Saved ${places.length} places as "${username}" (local)`);
             }
         }
         
@@ -1195,6 +1203,7 @@
                 return;
             }
             
+            // Try server first, fall back to localStorage
             try {
                 const response = await fetch(`/api/load/${encodeURIComponent(username)}`);
                 const result = await response.json();
@@ -1207,11 +1216,23 @@
                     filterCities();
                     showToast(`Loaded ${places.length} places for "${result.username}"`);
                 } else {
-                    showToast(result.error || 'Load failed');
+                    throw new Error(result.error || 'Not found');
                 }
             } catch (error) {
-                showToast('Connection error');
-                console.error('Load error:', error);
+                // Fallback to localStorage
+                const key = `travelmap_${username.toLowerCase()}`;
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    places = parsed.places;
+                    updatePlacesList();
+                    updateStats();
+                    updateMap();
+                    filterCities();
+                    showToast(`Loaded ${places.length} places for "${username}" (local)`);
+                } else {
+                    showToast('Username not found');
+                }
             }
         }
         
