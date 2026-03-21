@@ -777,11 +777,11 @@
         feMerge.append("feMergeNode").attr("in", "coloredBlur");
         feMerge.append("feMergeNode").attr("in", "SourceGraphic");
         
-        // Ocean background (dark charcoal)
+        // Ocean background (darker blue)
         svg.append("rect")
             .attr("width", width)
             .attr("height", height)
-            .attr("fill", "#1a1f2e");
+            .attr("fill", "#0a1628");
         
         // Countries group
         const countriesGroup = svg.append("g").attr("class", "countries");
@@ -806,14 +806,14 @@
         function updateMap() {
             if (!worldData) return;
             
-            // Update countries (muted gray-green)
+            // Update countries (muted gray-green with lighter blue outlines)
             countriesGroup.selectAll("path")
                 .data(worldData.features)
                 .join("path")
                 .attr("d", path)
                 .attr("fill", "#2d3a3a")
-                .attr("stroke", "#232d2d")
-                .attr("stroke-width", 0.3);
+                .attr("stroke", "#4a7a9a")
+                .attr("stroke-width", 0.5);
             
             // Update cities
             citiesGroup.selectAll("*").remove();
@@ -1244,8 +1244,8 @@
             showToast('Generating PNG...');
             
             const canvas = document.createElement('canvas');
-            const canvasWidth = 1200;
-            const canvasHeight = 600;
+            const canvasWidth = 2400;
+            const canvasHeight = 1200;
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
             const ctx = canvas.getContext('2d');
@@ -1256,14 +1256,14 @@
             const mapX = 0;
             const mapY = 0;
             
-            // Ocean (dark charcoal)
-            ctx.fillStyle = '#1a1f2e';
+            // Ocean (darker blue)
+            ctx.fillStyle = '#0a1628';
             ctx.fillRect(mapX, mapY, mapWidth, mapHeight);
             
             // Draw countries on canvas
             if (worldData) {
                 const canvasProjection = d3.geoEquirectangular()
-                    .scale(190)
+                    .scale(380)
                     .center([0, 0])
                     .translate([mapWidth / 2, mapHeight / 2]);
                 
@@ -1275,8 +1275,8 @@
                 });
                 ctx.fillStyle = '#2d3a3a';
                 ctx.fill();
-                ctx.strokeStyle = '#232d2d';
-                ctx.lineWidth = 0.3;
+                ctx.strokeStyle = '#4a7a9a';
+                ctx.lineWidth = 0.8;
                 ctx.stroke();
                 
                 // Draw all major cities as gray dots first
@@ -1285,7 +1285,7 @@
                     const selected = places.find(p => p.name === city.name && p.country === city.country);
                     if (coords && !selected) {
                         ctx.beginPath();
-                        ctx.arc(coords[0], coords[1], 4, 0, Math.PI * 2);
+                        ctx.arc(coords[0], coords[1], 6, 0, Math.PI * 2);
                         ctx.fillStyle = 'rgba(74, 85, 104, 0.6)';
                         ctx.fill();
                     }
@@ -1297,10 +1297,10 @@
                     if (coords) {
                         if (place.category === 'lived') {
                             // Gold star
-                            drawStar(ctx, coords[0], coords[1], 8, 5, '#f6c744', '#b8941f');
+                            drawStar(ctx, coords[0], coords[1], 14, 5, '#f6c744', '#b8941f');
                         } else {
                             // Blue triangle
-                            drawTriangle(ctx, coords[0], coords[1], 10, '#5dade2', '#3498db');
+                            drawTriangle(ctx, coords[0], coords[1], 16, '#5dade2', '#3498db');
                         }
                     }
                 });
